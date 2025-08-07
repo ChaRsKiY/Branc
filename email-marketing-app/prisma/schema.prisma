@@ -1,0 +1,205 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Subscription
+  subscription   Subscription?
+  subscriptionId String?
+
+  // Relations
+  forms      Form[]
+  templates  EmailTemplate[]
+  campaigns  Campaign[]
+  subscribers Subscriber[]
+
+  @@map("users")
+}
+
+model Subscription {
+  id        String            @id @default(cuid())
+  userId    String            @unique
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan      SubscriptionPlan
+  status    SubscriptionStatus
+  stripeCustomerId String?
+  stripeSubscriptionId String?
+  stripePriceId String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd DateTime?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@map("subscriptions")
+}
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELED
+  PAST_DUE
+}
+
+model Form {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  slug        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  settings    Json     // Form settings like colors, fields, etc.
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  subscribers Subscriber[]
+
+  @@map("forms")
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String
+  firstName String?
+  lastName  String?
+  metadata  Json?    // Additional custom fields
+  status    SubscriberStatus @default(ACTIVE)
+  
+  // Relations
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  formId    String?
+  form      Form?    @relation(fields: [formId], references: [id], onDelete: SetNull)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Campaign tracking
+  campaignSubscribers CampaignSubscriber[]
+
+  @@unique([email, userId])
+  @@map("subscribers")
+}
+
+enum SubscriberStatus {
+  ACTIVE
+  UNSUBSCRIBED
+  BOUNCED
+  COMPLAINED
+}
+
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  subject     String
+  content     String   // HTML content
+  previewText String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  campaigns Campaign[]
+
+  @@map("email_templates")
+}
+
+model Campaign {
+  id           String        @id @default(cuid())
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  subject      String
+  content      String        // HTML content
+  status       CampaignStatus @default(DRAFT)
+  scheduledAt  DateTime?
+  sentAt       DateTime?
+  
+  // Template reference
+  templateId   String?
+  template     EmailTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  
+  // Statistics
+  totalRecipients Int @default(0)
+  deliveredCount  Int @default(0)
+  openedCount     Int @default(0)
+  clickedCount    Int @default(0)
+  bouncedCount    Int @default(0)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  campaignSubscribers CampaignSubscriber[]
+
+  @@map("campaigns")
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  CANCELED
+}
+
+model CampaignSubscriber {
+  id           String   @id @default(cuid())
+  campaignId   String
+  campaign     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  subscriberId String
+  subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  
+  status       DeliveryStatus @default(PENDING)
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  openedAt     DateTime?
+  clickedAt    DateTime?
+  bouncedAt    DateTime?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([campaignId, subscriberId])
+  @@map("campaign_subscribers")
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  BOUNCED
+  FAILED
+}
