@@ -1,146 +1,220 @@
-# Email Marketing Platform
+# EmailCampaign - Платформа для управления email рассылками
 
-Полноценная платформа для создания email-кампаний с аутентификацией Clerk и подписками Stripe.
+Современная платформа для создания, управления и отправки email кампаний с красивым интерфейсом и мощным функционалом.
 
 ## 🚀 Возможности
 
-- ✅ **Аутентификация** - Clerk для регистрации и входа
-- ✅ **Подписки** - Stripe для управления тарифами
-- ✅ **Email редактор** - Визуальный редактор шаблонов
-- ✅ **Дашборд** - Управление подписками и статистика
-- ✅ **Webhooks** - Обработка событий Stripe
-- ✅ **Адаптивный дизайн** - Tailwind CSS
+- **Аутентификация с Clerk** - Безопасная регистрация и вход пользователей
+- **Визуальный редактор email** - Создание красивых писем с помощью GrapesJS
+- **Управление подписчиками** - Импорт, сегментация и аналитика подписчиков
+- **Формы подписки** - Создание и размещение форм на сайтах
+- **Email кампании** - Создание и отправка персонализированных писем
+- **Аналитика** - Детальная статистика по открытиям, кликам и конверсиям
+- **Автоматизация** - Настройка автоматических email последовательностей
+- **Тарифные планы** - Интеграция со Stripe для оплаты
+- **Адаптивный дизайн** - Красивый интерфейс на всех устройствах
 
-## 🛠️ Технологии
+## 🛠 Технологии
 
 - **Frontend**: Next.js 15, React 19, TypeScript
-- **Стили**: Tailwind CSS
+- **UI**: Tailwind CSS, Radix UI, Lucide Icons
 - **Аутентификация**: Clerk
-- **Платежи**: Stripe
 - **Email редактор**: GrapesJS
+- **Платежи**: Stripe
+- **Email отправка**: Nodemailer, Resend
+- **Стилизация**: Tailwind CSS v4
 
 ## 📦 Установка
 
-1. **Клонируйте репозиторий:**
+### 1. Клонирование репозитория
+
 ```bash
-git clone <your-repo-url>
-cd branc
+git clone <repository-url>
+cd email-campaign-manager
 ```
 
-2. **Установите зависимости:**
+### 2. Установка зависимостей
+
 ```bash
 npm install
 ```
 
-3. **Настройте переменные окружения:**
-Создайте файл `.env.local`:
+### 3. Настройка переменных окружения
+
+Скопируйте файл `.env.example` в `.env.local` и заполните необходимые переменные:
+
+```bash
+cp .env.example .env.local
+```
+
+#### Обязательные переменные:
+
 ```env
 # Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key
-CLERK_SECRET_KEY=sk_test_your_clerk_secret_key
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
 
-# Stripe
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
-STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
-STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret
-
-# App
+# App Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Email Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+FROM_EMAIL=noreply@yourdomain.com
+
+# Stripe Configuration
+STRIPE_SECRET_KEY=your_stripe_secret_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 ```
 
-4. **Запустите приложение:**
-```bash
-npm run dev
-```
+### 4. Настройка Clerk
 
-## 🔧 Настройка Clerk
-
-1. Зарегистрируйтесь на [clerk.com](https://clerk.com)
+1. Создайте аккаунт на [clerk.com](https://clerk.com)
 2. Создайте новое приложение
 3. Скопируйте ключи в `.env.local`
 4. Настройте домены в настройках Clerk
 
-## 💳 Настройка Stripe
+### 5. Настройка Stripe (опционально)
 
-1. Зарегистрируйтесь на [stripe.com](https://stripe.com)
-2. Перейдите в Dashboard → Developers → API keys
-3. Скопируйте ключи в `.env.local`
-4. Создайте продукты и цены в Stripe Dashboard
-5. Настройте webhook endpoint:
-   - URL: `https://your-domain.com/api/webhooks/stripe`
-   - Events: `checkout.session.completed`, `customer.subscription.*`, `invoice.payment_*`
+1. Создайте аккаунт на [stripe.com](https://stripe.com)
+2. Получите ключи API
+3. Добавьте их в `.env.local`
+
+### 6. Настройка SMTP
+
+Для отправки email настройте SMTP сервер. Пример для Gmail:
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+```
+
+**Примечание**: Для Gmail нужно создать пароль приложения в настройках безопасности.
+
+### 7. Запуск приложения
+
+```bash
+npm run dev
+```
+
+Приложение будет доступно по адресу [http://localhost:3000](http://localhost:3000)
 
 ## 📁 Структура проекта
 
 ```
 src/
-├── app/
-│   ├── api/
-│   │   ├── create-checkout-session/    # Создание Stripe checkout
-│   │   ├── subscription/               # Получение подписки
-│   │   ├── cancel-subscription/        # Отмена подписки
-│   │   └── webhooks/
-│   │       └── stripe/                 # Stripe webhooks
-│   ├── dashboard/                      # Дашборд пользователя
-│   ├── pricing/                        # Страница тарифов
-│   ├── layout.tsx                      # Главный layout
-│   └── page.tsx                        # Главная страница
-├── components/                         # React компоненты
-└── middleware.ts                       # Middleware для защиты маршрутов
+├── app/                    # App Router (Next.js 15)
+│   ├── api/               # API роуты
+│   ├── dashboard/         # Дашборд приложения
+│   ├── sign-in/          # Страница входа
+│   ├── sign-up/          # Страница регистрации
+│   └── page.tsx          # Главная страница
+├── components/            # React компоненты
+│   ├── ui/               # Базовые UI компоненты
+│   └── dashboard/        # Компоненты дашборда
+├── lib/                  # Утилиты и конфигурация
+└── middleware.ts         # Middleware для аутентификации
 ```
 
-## 🔐 Защищенные маршруты
+## 🎯 Основные функции
 
-Следующие маршруты требуют аутентификации:
-- `/dashboard` - Дашборд пользователя
-- `/editor` - Email редактор
-- `/campaigns` - Управление кампаниями
-- `/subscribers` - Управление подписчиками
-- `/billing` - Управление подпиской
+### Дашборд
+- Обзор статистики
+- Быстрые действия
+- Последние кампании
+- Активность аккаунта
 
-## 💰 Тарифы
+### Кампании
+- Создание новых кампаний
+- Визуальный редактор email
+- Настройка аудитории
+- Отправка и планирование
 
-- **Бесплатный** - 1,000 подписчиков, 5 шаблонов
-- **Профессиональный** ($29/мес) - 10,000 подписчиков, неограниченные шаблоны
-- **Бизнес** ($99/мес) - 100,000 подписчиков, все функции
+### Подписчики
+- Управление списками
+- Импорт/экспорт данных
+- Сегментация
+- Аналитика активности
 
-## 🚀 Развертывание
+### Формы подписки
+- Создание форм
+- Настройка дизайна
+- Получение кода для вставки
+- Статистика конверсий
 
-1. **Vercel (рекомендуется):**
-```bash
-npm run build
-vercel --prod
-```
+### Аналитика
+- Открытия и клики
+- Конверсии
+- A/B тестирование
+- Отчеты
 
-2. **Другие платформы:**
-- Настройте переменные окружения
-- Укажите webhook URL в Stripe
-- Настройте домены в Clerk
+## 🔧 API Endpoints
 
-## 🔧 Разработка
+### Кампании
+- `GET /api/campaigns` - Получить список кампаний
+- `POST /api/campaigns` - Создать новую кампанию
+- `PUT /api/campaigns/[id]` - Обновить кампанию
+- `DELETE /api/campaigns/[id]` - Удалить кампанию
 
-```bash
-# Запуск в режиме разработки
-npm run dev
+### Подписчики
+- `GET /api/subscribers` - Получить список подписчиков
+- `POST /api/subscribers` - Добавить подписчика
+- `PUT /api/subscribers` - Обновить подписчика
+- `DELETE /api/subscribers/[id]` - Удалить подписчика
 
-# Сборка для продакшена
-npm run build
+### Email
+- `POST /api/send-email` - Отправить одиночное письмо
+- `PUT /api/send-email` - Отправить кампанию
 
-# Запуск продакшн версии
-npm start
+## 🎨 Кастомизация
 
-# Линтинг
-npm run lint
-```
+### Темы и стили
+Приложение использует Tailwind CSS. Основные цвета и стили можно изменить в файле `tailwind.config.js`.
 
-## 📝 TODO
+### Компоненты
+Все UI компоненты находятся в `src/components/ui/` и могут быть легко кастомизированы.
 
-- [ ] Добавить базу данных (Prisma + PostgreSQL)
-- [ ] Реализовать email редактор с GrapesJS
-- [ ] Добавить отправку email через SMTP
-- [ ] Создать систему аналитики
-- [ ] Добавить A/B тестирование
-- [ ] Реализовать API для интеграций
+### Email шаблоны
+Шаблоны email создаются с помощью GrapesJS редактора. Можно добавить новые блоки и стили.
+
+## 🚀 Деплой
+
+### Vercel (рекомендуется)
+
+1. Подключите репозиторий к Vercel
+2. Добавьте переменные окружения в настройках проекта
+3. Деплой произойдет автоматически
+
+### Другие платформы
+
+Приложение можно развернуть на любой платформе, поддерживающей Next.js:
+- Netlify
+- Railway
+- Heroku
+- DigitalOcean App Platform
+
+## 📊 Мониторинг и аналитика
+
+### Логи
+Все API запросы и ошибки логируются в консоль. Для продакшена рекомендуется настроить внешний сервис логирования.
+
+### Метрики
+Приложение собирает базовые метрики:
+- Количество отправленных email
+- Процент открытий и кликов
+- Активность пользователей
+
+## 🔒 Безопасность
+
+- Аутентификация через Clerk
+- Защищенные API роуты
+- Валидация данных
+- Rate limiting (рекомендуется добавить)
+- HTTPS в продакшене
 
 ## 🤝 Вклад в проект
 
@@ -151,4 +225,24 @@ npm run lint
 
 ## 📄 Лицензия
 
-MIT License
+MIT License - см. файл [LICENSE](LICENSE) для деталей.
+
+## 🆘 Поддержка
+
+Если у вас есть вопросы или проблемы:
+
+1. Проверьте [Issues](https://github.com/your-repo/issues)
+2. Создайте новое Issue с описанием проблемы
+3. Обратитесь к документации
+
+## 🎉 Благодарности
+
+- [Clerk](https://clerk.com) за аутентификацию
+- [GrapesJS](https://grapesjs.com) за email редактор
+- [Stripe](https://stripe.com) за платежи
+- [Tailwind CSS](https://tailwindcss.com) за стили
+- [Next.js](https://nextjs.org) за фреймворк
+
+---
+
+**EmailCampaign** - Создавайте потрясающие email кампании! 🚀
